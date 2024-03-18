@@ -51,8 +51,9 @@ func main() {
 
 ## License
 
-GoSSH is released under the MIT License. See the [LICENSE](https://github.com/treeforest/gossh/blob/main/LICENSE) file for more information.
+[GNU General Public License v3.0](https://github.com/treeforest/gossh/blob/main/LICENSE) 
 
 ---
 
 This README document provides a brief overview of the GoSSH package and its usage. Feel free to update and customize it according to your specific needs.
+
