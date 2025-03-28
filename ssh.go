@@ -19,6 +19,12 @@ import (
 	"golang.org/x/crypto/ssh/knownhosts"
 )
 
+var defaultLogger Logger
+
+func SetDefaultLogger(logger Logger) {
+	defaultLogger = logger
+}
+
 type Logger func(format string, v ...interface{})
 
 func Connect(host string, port uint, username, password string) (*SSH, error) {
@@ -60,7 +66,8 @@ func (s *SSH) Ping() error {
 }
 
 func (s *SSH) Run(cmd string) ([]byte, error) {
-	s.Log("$ %s", cmd)
+	s.log("$ %s", cmd)
+
 	return s.Client.Run(cmd)
 }
 
@@ -137,7 +144,7 @@ func (s *SSH) Download(remotePath, localDir string) (err error) {
 }
 
 func (s *SSH) downloadDirectory(sftpClient *sftp.Client, remoteDir, localDir string) error {
-	s.Log("download directory %s -> %s", remoteDir, localDir)
+	s.log("download directory %s -> %s", remoteDir, localDir)
 
 	entries, err := sftpClient.ReadDir(remoteDir)
 	if err != nil {
@@ -167,7 +174,7 @@ func (s *SSH) downloadDirectory(sftpClient *sftp.Client, remoteDir, localDir str
 }
 
 func (s *SSH) downloadFile(sftpClient *sftp.Client, remotePath, localPath string) error {
-	s.Log("download file %s -> %s", remotePath, localPath)
+	s.log("download file %s -> %s", remotePath, localPath)
 
 	remoteFile, err := sftpClient.Open(remotePath)
 	if err != nil {
@@ -226,7 +233,7 @@ func (s *SSH) Upload(localPath, remoteDir string) (err error) {
 }
 
 func (s *SSH) uploadDirectory(sftpClient *sftp.Client, localDir, remoteDir string) error {
-	s.Log("upload directory %s -> %s", localDir, remoteDir)
+	s.log("upload directory %s -> %s", localDir, remoteDir)
 
 	entries, err := os.ReadDir(localDir)
 	if err != nil {
@@ -255,7 +262,7 @@ func (s *SSH) uploadDirectory(sftpClient *sftp.Client, localDir, remoteDir strin
 }
 
 func (s *SSH) uploadFile(sftpClient *sftp.Client, localPath, remotePath string) error {
-	s.Log("upload file %s -> %s", localPath, remotePath)
+	s.log("upload file %s -> %s", localPath, remotePath)
 
 	localFile, err := os.Open(localPath)
 	if err != nil {
@@ -389,6 +396,14 @@ func (s *SSH) connect() error {
 
 	s.Client = client
 	return nil
+}
+
+func (s *SSH) log(format string, a ...interface{}) {
+	if s.Log != nil {
+		s.Log(format, a...)
+	} else if defaultLogger != nil {
+		defaultLogger(format, a...)
+	}
 }
 
 func getKnownFile() (string, error) {
