@@ -2,7 +2,7 @@ package gossh
 
 import (
 	"github.com/stretchr/testify/require"
-	"github.com/treeforest/logger"
+	"github.com/treeforest/golog"
 	"testing"
 )
 
@@ -17,7 +17,8 @@ func TestMain(m *testing.M) {
 
 	defer conn.Close()
 
-	conn.Log = logger.Debugf
+	l := golog.NewLogger(nil)
+	conn.Log = l.Debugf
 
 	m.Run()
 }
